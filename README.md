@@ -1,120 +1,133 @@
-1 Introduction et probl´ematique
-1.1 Objectif
-Le but de ce projet est de construire un mod`ele de machine learning capable de distinguer deux
-cat´egories de tumeurs `a partir de donn´ees num´eriques extraites d’analyses et d’images de masses
-mammaires :
-• B´enigne : absence de caract`ere malin.
-• Maligne : pr´esence d’un caract`ere malin.
-1.2 Algorithme XGBoost
-XGBoost est un algorithme d’intelligence artificielle tr`es puissant, utilis´e pour pr´edire des r´esultats
-`a partir de tableaux de donn´ees. Il fonctionne en combinant plusieurs arbres de d´ecision simples,
-qui se corrigent les uns apr`es les autres afin de devenir de plus en plus pr´ecis. C’est l’un des outils
-les plus populaires et les plus rapides pour r´esoudre des probl`emes de classification ou de pr´ediction
-de valeurs num´eriques.
-1.3 Probl´ematique
-Dans quelle mesure la s´election des variables explicatives permet-elle de r´eduire la complexit´e d’un
-mod`ele XGBoost tout en pr´eservant ses performances de classification ?
-2
-2 Pr´esentation du jeu de donn´ees
-Le projet s’appuie sur le jeu de donn´ees Breast Cancer Wisconsin (Diagnostic). Il contient 569
-observations. Le fichier initial comporte 32 colonnes, dont les colonnes non explicatives id et
-Unnamed: 32. En excluant ces deux colonnes, l’analyse porte sur 30 variables explicatives.
-La r´epartition des observations entre les deux cat´egories de tumeurs est pr´esent´ee dans le tableau
-ci-dessous.
-Table 1: Caract´eristiques principales du jeu de donn´ees
-´ El´ement
-Valeur
-Observations
-Colonnes initiales
-569
-32
-Colonnes non explicatives id, Unnamed: 32
-Variables explicatives
-30
-Tumeurs b´enignes
-Tumeurs malignes
-357 (62,74%)
-212 (37,26%)
-Les variables num´eriques d´ecrivent plusieurs caract´eristiques des cellules et de leurs noyaux : leur
-taille et leur texture, leur p´erim`etre et leur surface, ainsi que leur compacit´e, leur concavit´e, leur
-sym´etrie et leur dimension fractale. Pour chaque famille de caract´eristiques, le jeu fournit diff´erentes
-mesures : une moyenne (mean), une erreur standard (se) et une mesure des valeurs extrˆemes
-(worst).
-3 M´ethodologie
-Pour ´etudier l’effet de la s´election des variables, nous comparerons trois versions du mˆeme mod`ele
-XGBoost. Le mod`ele A servira de r´ef´erence et utilisera les 30 variables explicatives. Dans le mod`ele
-B, nous retirerons les variables fortement corr´el´ees entre elles afin de r´eduire la redondance. Pour
-le mod`ele C, nous conserverons les sept variables les plus importantes, s´electionn´ees `a partir de leur
-importance par permutation.
-La comparaison s’appuiera sur plusieurs m´etriques compl´ementaires. L’accuracy indique la part des
-pr´edictions correctes parmi toutes les observations. La pr´ecision mesure la fiabilit´e des pr´edictions
-d’une classe, tandis que le rappel indique dans quelle mesure les observations de cette classe sont
-retrouv´ees. Le F1-score combine pr´ecision et rappel en un seul indicateur. Enfin, le ROC-AUC
-´evalue la capacit´e du mod`ele `a distinguer les deux classes lorsque le seuil de d´ecision varie.
-Nous examinerons en priorit´e les r´esultats moyens de validation crois´ee, qui permettent de comparer
-les mod`eles sur plusieurs partitions des donn´ees d’entraˆınement, puis les confronterons aux r´esultats
-obtenus sur le jeu de test. Nous tiendrons ´egalement compte du nombre de variables utilis´ees :
-l’objectif est de v´erifier si un mod`ele plus compact peut conserver des performances de classification
-proches de celles du mod`ele de r´ef´erence.
-Comparaison des mod`eles
-Le tableau ci-dessous rassemble les r´esultats moyens de validation crois´ee. Cette comparaison
-permet d’observer `a la fois la qualit´e de classification et le nombre de variables conserv´ees par
-chaque mod`ele.
-Table 2: R´esultats de validation crois´ee et nombre de variables
-M´etrique CV
-Mod`ele A Mod`ele B Mod`ele C
-Accuracy
-Precision
-Recall
-F1-score
-ROC-AUC
-Nombre de variables
-96,92%
-96,48%
-95,29%
-95,85%
-99,34%
-30
-94,73%
-94,57%
-91,18%
-92,81%
-98,88%
-R´eduit
-96,92%
-95,88%
-95,88%
-95,87%
-99,36%
-7
-Les r´esultats montrent que le mod`ele B obtient des scores plus faibles que le mod`ele A pour
-l’ensemble des m´etriques. La suppression des variables corr´el´ees n’a donc pas am´elior´e la classi
-fication dans cette exp´erience. Le mod`ele C, en revanche, conserve une accuracy et un F1-score
-presque identiques `a ceux du mod`ele A ; son recall et son ROC-AUC sont ´egalement tr`es proches.
-Il atteint ces r´esultats avec seulement sept variables au lieu de trente, ce qui en fait une option plus
-compacte.
-Ces ´ecarts restent modestes et ne suffisent pas, `a eux seuls, `a d´emontrer une sup´eriorit´e statistique
-du mod`ele C. Ils sugg`erent toutefois qu’une s´election cibl´ee des variables peut r´eduire la complexit´e
-sans d´egrader sensiblement les performances observ´ees.
-6 Limites m´ethodologiques
-1. S´election des variables et validation crois´ee. Pour le mod`ele C, les variables ont ´et´e
-s´electionn´ees `a partir de l’ensemble d’entraˆınement avant la validation crois´ee. Les folds de
-validation ont donc indirectement particip´e au choix des variables. Pour obtenir une estima
-tion plus rigoureuse, la s´election doit ˆetre r´ep´et´ee `a l’int´erieur de chaque fold, en utilisant
-uniquement son sous-ensemble d’entraˆınement.
-2. Comparaison statistique. Les diff´erences de scores entre les mod`eles A et C sont mod
-estes. Il convient donc de ne pas les pr´esenter comme une am´elioration statistiquement
-d´emontr´ee. Une comparaison sur les mˆemes partitions et une proc´edure de validation adapt´ee
-sont n´ecessaires pour tirer une conclusion plus solide.
-3. Jeu de test. Le jeu de test doit rester r´eserv´e `a l’´evaluation finale. Il ne doit servir ni `a
-choisir les variables, ni `a r´egler les hyperparam`etres, ni `a s´electionner le meilleur mod`ele.
-4. Port´ee m´edicale. Cette ´etude utilise le jeu de donn´ees dans un cadre p´edagogique. Les
-r´esultats obtenus ne suffisent pas `a ´etablir qu’un mod`ele serait fiable pour une utilisation
-clinique r´eelle.
-9
-7 Conclusion
-Dans cette exp´erience, retirer les variables fortement corr´el´ees n’a pas am´elior´e les performances
-de XGBoost. ` A l’inverse, l’importance par permutation a permis de retenir sept variables et de
-construire un mod`ele compact, aux r´esultats comparables `a ceux du mod`ele A sur le jeu de test.
-Ce r´esultat reste `a confirmer par une validation sans fuite d’information, dans laquelle la s´election
-des variables est r´ep´et´ee `a l’int´erieur de chaque fold
+# XGBoost pour la classification des tumeurs mammaires
+
+## 1. Introduction et problématique
+
+### 1.1 Objectif
+Le projet vise à construire un modèle de machine learning capable de distinguer deux catégories de tumeurs à partir de données numériques issues d’analyses et d’images de masses mammaires :
+
+- Bénigne : absence de caractère malin
+- Maligne : présence d’un caractère malin
+
+L’objectif principal est d’évaluer l’impact de la sélection des variables explicatives sur la performance d’un modèle XGBoost, tout en cherchant à réduire sa complexité sans dégrader significativement ses résultats de classification.
+
+### 1.2 Algorithme XGBoost
+XGBoost est un algorithme de machine learning très performant, largement utilisé pour les tâches de classification et de régression. Il repose sur l’assemblage de nombreux arbres de décision, chacun corrigeant les erreurs des arbres précédents afin d’améliorer progressivement la précision du modèle.
+
+### 1.3 Problématique
+Dans quelle mesure la sélection des variables explicatives permet-elle de réduire la complexité d’un modèle XGBoost tout en maintenant des performances de classification comparables ?
+
+---
+
+## 2. Présentation du jeu de données
+
+Le projet utilise le jeu de données Breast Cancer Wisconsin (Diagnostic), composé de 569 observations. Le fichier initial comporte 32 colonnes, dont deux colonnes non explicatives :
+
+- id
+- Unnamed: 32
+
+En excluant ces deux colonnes, l’analyse porte sur 30 variables explicatives.
+
+### 2.1 Répartition des classes
+La distribution des observations entre les deux catégories de tumeurs est la suivante :
+
+| Catégorie | Nombre d’observations | Pourcentage |
+|----------|----------------------|-------------|
+| Bénigne  | 357                  | 62,74 %     |
+| Maligne  | 212                  | 37,26 %     |
+
+### 2.2 Description des variables
+Les variables numériques décrivent plusieurs caractéristiques des cellules et des noyaux, notamment :
+
+- taille
+- texture
+- périmètre
+- surface
+- compacité
+- concavité
+- symétrie
+- dimension fractale
+
+Pour chaque famille de caractéristiques, le jeu de données fournit plusieurs mesures :
+
+- mean : moyenne
+- se : erreur standard
+- worst : valeur extrême
+
+---
+
+## 3. Méthodologie
+
+Pour analyser l’effet de la sélection des variables, nous comparons trois versions du même modèle XGBoost :
+
+- Modèle A : référence, utilisant les 30 variables explicatives
+- Modèle B : réduction des variables fortement corrélées entre elles pour limiter la redondance
+- Modèle C : sélection des sept variables les plus importantes selon l’importance par permutation
+
+### 3.1 Critères d’évaluation
+Les performances sont évaluées à l’aide de plusieurs métriques :
+
+- Accuracy : proportion de prédictions correctes
+- Precision : capacité du modèle à prédire correctement une classe
+- Recall : capacité du modèle à retrouver les observations d’une classe
+- F1-score : moyenne harmonique entre précision et rappel
+- ROC-AUC : capacité du modèle à distinguer les deux classes selon différents seuils de décision
+
+Nous comparons en priorité les résultats moyens obtenus par validation croisée, puis nous les confrontons aux performances observées sur le jeu de test.
+
+### 3.2 Objectif de la comparaison
+L’objectif est de vérifier si un modèle plus compact, utilisant moins de variables, peut conserver des performances de classification proches de celles du modèle de référence.
+
+---
+
+## 4. Comparaison des modèles
+
+Le tableau ci-dessous présente les résultats moyens obtenus lors de la validation croisée.
+
+| Métrique | Modèle A | Modèle B | Modèle C |
+|----------|----------|----------|----------|
+| Accuracy | 96,92 % | 94,73 % | 96,92 % |
+| Precision | 96,48 % | 94,57 % | 95,88 % |
+| Recall | 95,29 % | 91,18 % | 95,88 % |
+| F1-score | 95,85 % | 92,81 % | 95,87 % |
+| ROC-AUC | 99,34 % | 98,88 % | 99,36 % |
+| Nombre de variables | 30 | Réduit | 7 |
+
+### 4.1 Interprétation des résultats
+Les résultats montrent que le Modèle B obtient des performances inférieures à celles du Modèle A sur toutes les métriques. La suppression des variables fortement corrélées n’a donc pas amélioré la classification dans cette expérience.
+
+Le Modèle C, quant à lui, conserve des performances très proches de celles du Modèle A :
+
+- Accuracy presque identique
+- F1-score quasiment équivalent
+- Recall et ROC-AUC très proches
+- Réduction considérable du nombre de variables : 30 à 7
+
+Ce modèle apparaît donc comme une alternative plus compacte, tout en maintenant une qualité de classification comparable au modèle de référence.
+
+Cependant, les écarts observés restent modestes et ne permettent pas, à eux seuls, de conclure à une supériorité statistique du Modèle C. Ils suggèrent néanmoins qu’une sélection ciblée des variables peut réduire la complexité du modèle sans dégrader sensiblement ses performances.
+
+---
+
+## 5. Limites méthodologiques
+
+Plusieurs limites doivent être prises en compte :
+
+1. Sélection des variables et validation croisée  
+   Pour le Modèle C, les variables ont été sélectionnées à partir de l’ensemble d’entraînement avant la validation croisée. Cela signifie que les folds ont indirectement participé au choix des variables. Pour une estimation plus rigoureuse, la sélection doit être répétée à l’intérieur de chaque fold, en utilisant uniquement le sous-ensemble d’entraînement de ce fold.
+
+2. Comparaison statistique  
+   Les différences entre les modèles A et C sont modestes. Il ne faut donc pas les présenter comme une amélioration statistiquement démontrée. Une comparaison sur les mêmes partitions et une procédure de validation adaptée sont nécessaires pour tirer une conclusion plus solide.
+
+3. Jeu de test  
+   Le jeu de test doit rester réservé à l’évaluation finale. Il ne doit ni servir à choisir les variables, ni à ajuster les hyperparamètres, ni à sélectionner le meilleur modèle.
+
+4. Portée médicale  
+   Cette étude est réalisée dans un cadre pédagogique. Les résultats obtenus ne suffisent pas à affirmer qu’un modèle serait fiable pour une utilisation clinique réelle.
+
+---
+
+## 6. Conclusion
+
+Dans cette expérience, la suppression des variables fortement corrélées n’a pas amélioré les performances de XGBoost. À l’inverse, l’importance par permutation a permis de retenir sept variables et de construire un modèle plus compact, dont les performances restent proches de celles du modèle de référence sur le jeu de test.
+
+Ce résultat reste à confirmer par une validation sans fuite d’information, dans laquelle la sélection des variables est répétée à l’intérieur de chaque fold. Cette approche permettrait d’obtenir une estimation plus fiable de l’impact réel de la sélection des variables sur les performances du modèle.
